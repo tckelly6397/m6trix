@@ -50,14 +50,7 @@ void app_main(void) {
     // Start the web server
     httpd_handle_t server = start_webserver();
     if (server) {
-        // Register custom GPIO route
-        httpd_uri_t uri_gpio = {
-            .uri = "/gpio/*",
-            .method = HTTP_GET,
-            .handler = gpio_handler,
-            .user_ctx = NULL,
-        };
-        register_route(server, &uri_gpio);
+        // Dynamically register a GET route
+        register_get_route(server, "/gpio/*", gpio_handler, NULL);
     }
 }
-
