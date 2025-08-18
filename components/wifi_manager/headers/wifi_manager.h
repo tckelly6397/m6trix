@@ -1,14 +1,21 @@
-#ifndef WIFI_H
-#define WIFI_H
+#ifndef WIFI_MANAGER_H
+#define WIFI_MANAGER_H
 
-// Wi-Fi credentials
-#define WIFI_SSID "The Station"
-#define WIFI_PASS "RZMJ964QB5HE7CAV"
+#include <stdbool.h>
 
-// Buffer to hold the IP address
-extern char ip_address[16];
+// Struct to hold Wi-Fi status
+typedef struct {
+    bool sta_enabled;
+    bool sta_connected;
+    bool ap_enabled;
+} wifi_status_t;
 
-// Function to initialize Wi-Fi
-void wifi_init(void);
+// Function declarations
+void wifi_init_sta(const char *ssid, const char *password);
+// void wifi_disable_sta(void);
+// void wifi_init_ap(const char *ssid, const char *password);
+// void wifi_disable_ap(void);
+// wifi_status_t wifi_check_status(void);
 
 #endif
+

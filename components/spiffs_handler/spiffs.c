@@ -40,7 +40,7 @@ void spiffs_init(void) {
     }
 
     // Test SPIFFS by opening a file
-    FILE *f = fopen("/public/test.html", "r");
+    FILE *f = fopen("/public/index.html", "r");
     if (f == NULL) {
         ESP_LOGE(TAG, "Failed to open file");
     } else {

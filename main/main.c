@@ -45,7 +45,7 @@ void app_main(void) {
     gpio_set_level(OUTPUT14, 0);
 
     // Initialize Wi-Fi
-    wifi_init();
+    wifi_init_sta("The Station", "RZMJ964QB5HE7CAV");
 
     // Start the web server
     httpd_handle_t server = start_webserver();
