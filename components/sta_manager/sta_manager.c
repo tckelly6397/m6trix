@@ -2,12 +2,14 @@
 #include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
+#include "esp_netif.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "esp_log.h"
+#include "sta_manager.h"
 
 #define WIFI_CONNECTED_BIT BIT0
-static const char *TAG = "wifi_sta";
+static const char *TAG = "STA_MANAGER";
 static EventGroupHandle_t s_wifi_event_group;
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
@@ -24,7 +26,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     }
 }
 
-void wifi_init_sta(const char *ssid, const char *password) {
+void sta_manager_start(const char *ssid, const char *password) {
     // Validate input arguments
     if (ssid == NULL || password == NULL) {
         ESP_LOGE(TAG, "SSID or password is NULL.");
@@ -85,6 +87,11 @@ void wifi_init_sta(const char *ssid, const char *password) {
 
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "Connected to Wi-Fi network: %s", ssid);
+
+        esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+        esp_netif_ip_info_t ip_info;
+        esp_netif_get_ip_info(netif, &ip_info);
+        ESP_LOGI(TAG, "STA IP: " IPSTR, IP2STR(&ip_info.ip));
     } else {
         ESP_LOGE(TAG, "Failed to connect to Wi-Fi.");
     }

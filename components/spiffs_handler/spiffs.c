@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "headers/spiffs_handler.h"
+#include "spiffs_handler.h"
 
 static const char *TAG = "SPIFFS";
 
