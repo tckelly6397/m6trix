@@ -5,6 +5,9 @@
 #include "esp_netif.h"
 #include "esp_log.h"
 
+#define SSID     "ESP32_AP"
+#define PASSWORD "12345678"
+
 static const char *TAG = "AP_MANAGER";
 
 void ap_manager_start(void) {
@@ -17,14 +20,14 @@ void ap_manager_start(void) {
 
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = "ESP32_AP",
-            .ssid_len = strlen("ESP32_AP"),
-            .password = "12345678",
+            .ssid = SSID,
+            .ssid_len = strlen(SSID),
+            .password = PASSWORD,
             .max_connection = 4,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
-    if (strlen("12345678") == 0) {
+    if (strlen(PASSWORD) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
