@@ -50,9 +50,57 @@
             </section>
         </main>
 
+            <section id="wifi">
+                <h2>Wi-Fi Credentials</h2>
+                <ul id="credList"></ul>
+                <form id="credForm">
+                    <input type="text" name="ssid" placeholder="SSID" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Add</button>
+                </form>
+            </section>
+        </main>
+
         <footer>
             <p>&copy; 2025 6x6x6 LED Cube Project. All rights reserved.</p>
         </footer>
+
+        <script>
+            async function loadCreds() {
+                const res = await fetch('/credentials');
+                const creds = await res.json();
+                const list = document.getElementById('credList');
+                list.innerHTML = '';
+                creds.forEach(c => {
+                    const li = document.createElement('li');
+                    li.textContent = c.ssid + ' ';
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Delete';
+                    btn.onclick = async () => {
+                        await fetch('/credentials/delete?ssid=' + encodeURIComponent(c.ssid));
+                        loadCreds();
+                    };
+                    li.appendChild(btn);
+                    list.appendChild(li);
+                });
+            }
+
+            document.getElementById('credForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const params = new URLSearchParams();
+                for (const [k, v] of formData.entries()) {
+                    params.append(k, v);
+                }
+                await fetch('/credentials', {
+                    method: 'POST',
+                    body: params
+                });
+                e.target.reset();
+                loadCreds();
+            });
+
+            loadCreds();
+        </script>
     </body>
 </html>
-

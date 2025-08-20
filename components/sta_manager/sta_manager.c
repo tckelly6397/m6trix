@@ -26,15 +26,15 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     }
 }
 
-void sta_manager_start(const char *ssid, const char *password) {
+bool sta_manager_start(const char *ssid, const char *password) {
     // Validate input arguments
     if (ssid == NULL || password == NULL) {
         ESP_LOGE(TAG, "SSID or password is NULL.");
-        return;
+        return false;
     }
     if (strlen(ssid) == 0 || strlen(password) < 8 || strlen(password) > 63) {
         ESP_LOGE(TAG, "Invalid SSID or password length.");
-        return;
+        return false;
     }
 
     s_wifi_event_group = xEventGroupCreate();
@@ -97,6 +97,19 @@ void sta_manager_start(const char *ssid, const char *password) {
     }
 
     // Cleanup event handlers
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
+    bool connected = bits & WIFI_CONNECTED_BIT;
+
+    if (!connected) {
+        ESP_LOGE(TAG, "Failed to connect to Wi-Fi.");
+        ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
+        ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
+        esp_wifi_stop();
+        esp_wifi_deinit();
+        esp_event_loop_delete_default();
+        esp_netif_deinit();
+        return false;
+    }
+
+    // Keep handlers registered so Wi-Fi can auto-reconnect
+    return true;
 }
