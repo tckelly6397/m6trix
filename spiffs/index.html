@@ -59,6 +59,17 @@
                     <button type="submit">Add</button>
                 </form>
             </section>
+
+        <h1>Onboard LED</h1>
+
+    <div class="row">
+      <label for="color">Color:</label>
+      <input id="color" type="color" value="#ff0000" />
+      <button id="onBtn">On</button>
+      <button id="offBtn">Off</button>
+    </div>
+
+    <p id="status">—</p>
         </main>
 
         <footer>
@@ -102,5 +113,58 @@
 
             loadCreds();
         </script>
+
+           <script>
+      // Small helper: send GET and show status
+      let inflight; // AbortController for last request
+      function send(path) {
+        if (inflight) inflight.abort();
+        inflight = new AbortController();
+        const signal = inflight.signal;
+
+        const url = path.startsWith('/') ? path : '/' + path;
+
+        document.getElementById('status').textContent = `Request: ${url}`;
+        return fetch(url, { method: 'GET', signal })
+          .then(r => r.text().then(t => ({ ok: r.ok, text: t })))
+          .then(({ ok, text }) => {
+            document.getElementById('status').textContent =
+              ok ? `OK: ${text}` : `Error: ${text}`;
+          })
+          .catch(err => {
+            if (err.name === 'AbortError') return; // ignore cancelled
+            document.getElementById('status').textContent = `Fetch error: ${err}`;
+          });
+      }
+
+      // Debounce rapid color changes from the picker
+      let debounceTimer;
+      function sendColorDebounced(hex) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => send(`/led/color/${hex}`), 120);
+      }
+
+      // Convert "#RRGGBB" -> "RRGGBB"
+      function stripHash(hex) {
+        return (hex || '').replace(/^#/, '');
+      }
+
+      // Wire up UI
+      const color = document.getElementById('color');
+      const onBtn = document.getElementById('onBtn');
+      const offBtn = document.getElementById('offBtn');
+
+      // Fire while dragging (smoother), and also on final change
+      color.addEventListener('input',  () => sendColorDebounced(stripHash(color.value)));
+      color.addEventListener('change', () => send(`/led/color/${stripHash(color.value)}`));
+
+      onBtn.addEventListener('click',  () => send('/led/on'));
+      offBtn.addEventListener('click', () => send('/led/off'));
+
+      // Optional: initialize LED to current picker color on page load
+      window.addEventListener('load', () => {
+        send(`/led/color/${stripHash(color.value)}`);
+      });
+    </script>
     </body>
 </html>
